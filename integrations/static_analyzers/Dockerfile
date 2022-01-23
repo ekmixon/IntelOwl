@@ -1,4 +1,4 @@
-FROM python:3.8.4-slim
+FROM python:slim
 
 ENV PROJECT_PATH /opt/deploy
 ENV LOG_PATH /var/log/intel_owl/static_analyzers
