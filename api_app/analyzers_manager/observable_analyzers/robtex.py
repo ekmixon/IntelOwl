@@ -38,11 +38,7 @@ class Robtex(classes.ObservableAnalyzer):
         except requests.ConnectionError as e:
             raise AnalyzerRunException(f"Connection error: {e}")
         else:
-            loaded_results = []
-            for item in result:
-                if len(item) > 0:
-                    loaded_results.append(json.loads(item))
-
+            loaded_results = [json.loads(item) for item in result if len(item) > 0]
         return loaded_results
 
     @classmethod

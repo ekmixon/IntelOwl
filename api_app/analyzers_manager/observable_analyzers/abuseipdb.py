@@ -38,7 +38,7 @@ class AbuseIPDB(ObservableAnalyzer):
 
     @staticmethod
     def _get_mapping():
-        mapping = {
+        return {
             1: "DNS Compromise",
             2: "DNS Poisoning",
             3: "Fraud Orders",
@@ -63,7 +63,6 @@ class AbuseIPDB(ObservableAnalyzer):
             22: "SSH",
             23: "IoT Targeted",
         }
-        return mapping
 
     @classmethod
     def _monkeypatch(cls):

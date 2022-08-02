@@ -12,7 +12,6 @@ logger = logging.getLogger(__name__)
 
 class Cymru(ObservableAnalyzer):
     def run(self):
-        results = {}
         if self.observable_classification != self.ObservableTypes.HASH:
             raise AnalyzerRunException(
                 f"observable type {self.observable_classification} not supported"
@@ -22,7 +21,7 @@ class Cymru(ObservableAnalyzer):
         if hash_length == 64:
             raise AnalyzerRunException("sha256 are not supported by the service")
 
-        results["found"] = False
+        results = {"found": False}
         # reference: https://team-cymru.com/community-services/mhr/
         # if the resolution works, this means that the file is reported
         # as malware by Cymru

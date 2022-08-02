@@ -28,13 +28,11 @@ class MnemonicPassiveDNS(classes.ObservableAnalyzer):
         except requests.RequestException as e:
             raise AnalyzerRunException(e)
 
-        if self._cofformat:
-            result = [json.loads(line) for line in response.text.splitlines()]
-
-        else:
-            result = response.json()
-
-        return result
+        return (
+            [json.loads(line) for line in response.text.splitlines()]
+            if self._cofformat
+            else response.json()
+        )
 
     @classmethod
     def _monkeypatch(cls):

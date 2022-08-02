@@ -85,7 +85,7 @@ class UrlScan(ObservableAnalyzer):
         if self.observable_classification == self.ObservableTypes.URL:
             params["q"] = "page." + params["q"]
         try:
-            resp = self.session.get(self.base_url + "/search/", params=params)
+            resp = self.session.get(f"{self.base_url}/search/", params=params)
             resp.raise_for_status()
             result = resp.json()
         except requests.RequestException as e:

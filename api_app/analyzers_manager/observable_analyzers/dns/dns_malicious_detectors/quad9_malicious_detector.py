@@ -33,11 +33,7 @@ class Quad9MaliciousDetector(classes.ObservableAnalyzer):
         quad9_answer = self._quad9_dns_query(observable)
         # if Quad9 has not an answer the site could be malicious
         if not quad9_answer:
-            # Google dns request
-            google_answer = self._google_dns_query(observable)
-            # if Google response, Quad9 marked the site as malicious,
-            # elsewhere the site does not exist
-            if google_answer:
+            if google_answer := self._google_dns_query(observable):
                 return malicious_detector_response(self.observable_name, True)
 
         return malicious_detector_response(self.observable_name, False)

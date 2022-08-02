@@ -25,7 +25,7 @@ class Fortiguard(classes.ObservableAnalyzer):
         response.raise_for_status()
 
         category_match = re.search(pattern, str(response.content), flags=0)
-        dict_response = {"category": category_match.group(1) if category_match else ""}
+        dict_response = {"category": category_match[1] if category_match else ""}
         if dict_response["category"] == "Symfony":
             # this is caused by their backend when fails. dk why
             raise AnalyzerRunException(

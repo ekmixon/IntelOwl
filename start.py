@@ -15,35 +15,33 @@ docker_analyzers = [
     "qiling",
 ]
 
-path_mapping = {
-    "default": "docker/default.yml",
-    "test": "docker/test.override.yml",
-    "ci": "docker/ci.override.yml",
-    "django_server": "docker/django-server.override.yml",
-    "custom": "docker/custom.override.yml",
-    "traefik": "docker/traefik.override.yml",
-    "multi_queue": "docker/multi-queue.override.yml",
-    "test_multi_queue": "docker/test.multi-queue.override.yml",
-    "flower": "docker/flower.override.yml",
-    "test_flower": "docker/test.flower.override.yml",
-}
-# to fix the box-js folder name
-path_mapping.update(
+path_mapping = (
     {
+        "default": "docker/default.yml",
+        "test": "docker/test.override.yml",
+        "ci": "docker/ci.override.yml",
+        "django_server": "docker/django-server.override.yml",
+        "custom": "docker/custom.override.yml",
+        "traefik": "docker/traefik.override.yml",
+        "multi_queue": "docker/multi-queue.override.yml",
+        "test_multi_queue": "docker/test.multi-queue.override.yml",
+        "flower": "docker/flower.override.yml",
+        "test_flower": "docker/test.flower.override.yml",
+    }
+    | {
         name: f"integrations/{name.replace('box_js', 'box-js')}/compose.yml"
         for name in docker_analyzers
     }
-)
-path_mapping.update(
-    {
+    | {
         name
         + ".test": f"integrations/{name.replace('box_js', 'box-js')}/compose-tests.yml"
         for name in docker_analyzers
     }
 )
+
 path_mapping["all_analyzers"] = [path_mapping[key] for key in docker_analyzers]
 path_mapping["all_analyzers.test"] = [
-    path_mapping[key + ".test"] for key in docker_analyzers
+    path_mapping[f"{key}.test"] for key in docker_analyzers
 ]
 
 
@@ -115,10 +113,7 @@ def start():
         " Django server instead of Uwsgi",
     )
     args, unknown = parser.parse_known_args()
-    # logic
-    test_appendix = ""
-    if args.mode == "test":
-        test_appendix = ".test"
+    test_appendix = ".test" if args.mode == "test" else ""
     docker_flags = [
         args.__dict__[docker_analyzer] for docker_analyzer in docker_analyzers
     ]
@@ -131,13 +126,14 @@ def start():
     # default file
     compose_files = [path_mapping["default"]]
     # mode
-    if args.mode == "ci":
+    if (
+        args.mode != "ci"
+        and args.mode == "test"
+        and args.__dict__["django_server"]
+    ):
+        compose_files.append(path_mapping["django_server"])
+    elif args.mode != "ci" and args.mode == "test" or args.mode == "ci":
         compose_files.append(path_mapping[args.mode])
-    elif args.mode == "test":
-        if args.__dict__["django_server"]:
-            compose_files.append(path_mapping["django_server"])
-        else:
-            compose_files.append(path_mapping[args.mode])
     # upgrades
     for key in ["traefik", "multi_queue", "custom", "flower"]:
         if args.__dict__[key]:
@@ -146,7 +142,7 @@ def start():
     if args.mode == "test":
         for key in ["multi_queue", "flower"]:
             if args.__dict__[key]:
-                compose_files.append(path_mapping["test_" + key])
+                compose_files.append(path_mapping[f"test_{key}"])
     # additional integrations
     for key in docker_analyzers:
         if args.__dict__[key]:
@@ -155,7 +151,7 @@ def start():
         compose_files.extend(list(path_mapping[f"all_analyzers{test_appendix}"]))
 
     # load relevant .env file
-    load_dotenv("docker/.env" + test_appendix)
+    load_dotenv(f"docker/.env{test_appendix}")
     # construct final command
     base_command = [
         "docker-compose",
@@ -165,8 +161,7 @@ def start():
         "docker",
     ]
     for compose_file in compose_files:
-        base_command.append("-f")
-        base_command.append(compose_file)
+        base_command.extend(("-f", compose_file))
     # we use try/catch to mimick docker-compose's behaviour of handling CTRL+C event
     try:
         command = base_command + [args.docker_command] + unknown

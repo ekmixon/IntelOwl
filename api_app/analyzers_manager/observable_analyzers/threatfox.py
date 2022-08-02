@@ -22,8 +22,7 @@ class ThreatFox(classes.ObservableAnalyzer):
         except requests.RequestException as e:
             raise AnalyzerRunException(e)
 
-        result = response.json()
-        return result
+        return response.json()
 
     @classmethod
     def _monkeypatch(cls):

@@ -61,15 +61,15 @@ class PEInfo(FileAnalyzer):
             mt = {"0x14c": "x86", "0x0200": "Itanium", "0x8664": "x64"}
             architecture = ""
             if isinstance(machine_value, int):
-                architecture = mt.get(str(hex(machine_value)), "")
+                architecture = mt.get(hex(machine_value), "")
             if not architecture:
-                architecture = str(machine_value) + " => Not x86/64 or Itanium"
+                architecture = f"{str(machine_value)} => Not x86/64 or Itanium"
             results["architecture"] = architecture
 
-            results["os"] = "{}.{}".format(
-                pe.OPTIONAL_HEADER.MajorOperatingSystemVersion,
-                pe.OPTIONAL_HEADER.MinorOperatingSystemVersion,
-            )
+            results[
+                "os"
+            ] = f"{pe.OPTIONAL_HEADER.MajorOperatingSystemVersion}.{pe.OPTIONAL_HEADER.MinorOperatingSystemVersion}"
+
 
             results["entrypoint"] = hex(pe.OPTIONAL_HEADER.AddressOfEntryPoint)
 
@@ -110,10 +110,8 @@ class PEInfo(FileAnalyzer):
             results["flags"] = full_dump.get("Flags", [])
 
         except pefile.PEFormatError as e:
-            warning_message = (
-                "job_id:{} analyzer:{} md5:{} filename: {} PEFormatError {}"
-                "".format(self.job_id, self.analyzer_name, self.md5, self.filename, e)
-            )
+            warning_message = f"job_id:{self.job_id} analyzer:{self.analyzer_name} md5:{self.md5} filename: {self.filename} PEFormatError {e}"
+
             logger.warning(warning_message)
             self.report.errors.append(warning_message)
             self.report.status = self.report.Status.FAILED

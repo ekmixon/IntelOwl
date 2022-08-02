@@ -30,25 +30,25 @@ class Stratos(classes.ObservableAnalyzer):
 
         db_list = db.split("\n")
 
-        for ip_tuple in enumerate(db_list):
-            if ip_tuple[0] >= 2:
-                if ip in ip_tuple[1]:
-                    ip_rating = ((ip_tuple[1].split(","))[2]).strip()
-                    return ip_rating
-        return ""
+        return next(
+            (
+                ((ip_tuple[1].split(","))[2]).strip()
+                for ip_tuple in enumerate(db_list)
+                if ip_tuple[0] >= 2 and ip in ip_tuple[1]
+            ),
+            "",
+        )
 
     def run(self):
         ip = self.observable_name
-        result = {
-            "last24hrs_rating": "",
-            "new_attacker_rating": "",
-            "repeated_attacker_rating": "",
-        }
-
         self.check_dataset_status()
 
-        # Checks the IP in last24hrs attacker list.
-        result["last24hrs_rating"] = self.check_in_list(db_loc0, ip)
+        result = {
+            "new_attacker_rating": "",
+            "repeated_attacker_rating": "",
+            "last24hrs_rating": self.check_in_list(db_loc0, ip),
+        }
+
         # Checks the IP in new attacker list.
         result["new_attacker_rating"] = self.check_in_list(db_loc1, ip)
         # Checks the IP in repeated attacker list.
@@ -88,9 +88,7 @@ class Stratos(classes.ObservableAnalyzer):
             logger.debug("Traceback %s", exc_info=True)
             logger.exception(e)
 
-        db_location = [db_loc0, db_loc1, db_loc2]
-
-        return db_location
+        return [db_loc0, db_loc1, db_loc2]
 
     def check_dataset_status(self):
         if not os.path.isfile(db_loc0 and db_loc1 and db_loc2):

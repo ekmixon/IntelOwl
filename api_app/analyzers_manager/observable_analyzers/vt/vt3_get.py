@@ -9,12 +9,10 @@ from .vt3_base import VirusTotalv3AnalyzerMixin
 
 class VirusTotalv3(ObservableAnalyzer, VirusTotalv3AnalyzerMixin):
     def run(self):
-        result = self._vt_get_report(
+        return self._vt_get_report(
             self.observable_classification,
             self.observable_name,
         )
-
-        return result
 
     @classmethod
     def _monkeypatch(cls):

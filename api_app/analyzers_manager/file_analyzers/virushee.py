@@ -24,23 +24,20 @@ class VirusheeFileUpload(FileAnalyzer):
     def set_params(self, params):
         self.__to_force_scan = params.get("force_scan", False)
         self.__session = requests.Session()
-        api_key = self._secrets["api_key_name"]
-        if not api_key:
-            logger.info(f"{self.__repr__()} -> Continuing w/o API key..")
-        else:
+        if api_key := self._secrets["api_key_name"]:
             self.__session.headers["X-API-Key"] = api_key
+        else:
+            logger.info(f"{self.__repr__()} -> Continuing w/o API key..")
 
     def run(self):
         binary = self.read_file_bytes()
         if not binary:
             raise AnalyzerRunException("File is empty")
         if not self.__to_force_scan:
-            hash_result = self.__check_report_for_hash()
-            if hash_result:
+            if hash_result := self.__check_report_for_hash():
                 return hash_result
         task_id = self.__upload_file(binary)
-        result = self.__poll_status_and_result(task_id)
-        return result
+        return self.__poll_status_and_result(task_id)
 
     def __check_report_for_hash(self) -> Optional[dict]:
         response_json = None
@@ -56,7 +53,7 @@ class VirusheeFileUpload(FileAnalyzer):
         return response_json
 
     def __upload_file(self, binary: bytes) -> str:
-        name_to_send = self.filename if self.filename else self.md5
+        name_to_send = self.filename or self.md5
         files = {"file": (name_to_send, binary)}
         try:
             response = self.__session.post(f"{self.base_url}/file/upload", files=files)

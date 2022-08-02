@@ -54,16 +54,10 @@ def intercept_result(context, future: Future) -> None:
     """
     # 1. get current result object
     res = future.result()
-    # 2. dir from which we will read final analysis result
-    dir_name = context.get("read_result_from", None)
-    if not dir_name:
-        res["error"] += ", No specified file to read result from"
-        if res.get("returncode", -1) == 0:
-            res["returncode"] = -1
-    else:
+    if dir_name := context.get("read_result_from", None):
         # 3. read saved result file, if it exists
         dir_loc = safe_join("/home/thug", dir_name)
-        f_loc = dir_loc + "/analysis/json/analysis.json"
+        f_loc = f"{dir_loc}/analysis/json/analysis.json"
         if not os.path.exists(f_loc):
             res["error"] += f", result file {f_loc} does not exists."
             if res.get("returncode", -1) == 0:
@@ -75,6 +69,10 @@ def intercept_result(context, future: Future) -> None:
                 except json.JSONDecodeError:
                     res["report"] = fp.read()
 
+    else:
+        res["error"] += ", No specified file to read result from"
+        if res.get("returncode", -1) == 0:
+            res["returncode"] = -1
     # 4. set final result after modifications
     future._result = res
 

@@ -24,8 +24,7 @@ class FileInfo(FileAnalyzer):
         )
 
     def run(self):
-        results = {}
-        results["magic"] = magic.from_file(self.filepath)
+        results = {"magic": magic.from_file(self.filepath)}
         results["mimetype"] = magic.from_file(self.filepath, mime=True)
 
         binary = self.read_file_bytes()
@@ -36,8 +35,7 @@ class FileInfo(FileAnalyzer):
 
         try:
             with ExifTool(self.exiftool_path) as et:
-                exif_report = et.execute_json(self.filepath)
-                if exif_report:
+                if exif_report := et.execute_json(self.filepath):
                     exif_single_report = exif_report[0]
                     exif_report_cleaned = {
                         key: value

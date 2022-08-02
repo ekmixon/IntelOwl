@@ -40,8 +40,7 @@ class CloudFlareMaliciousDetector(classes.ObservableAnalyzer):
             response.raise_for_status()
             response_dict = response.json()
 
-            response_answer = response_dict.get("Answer", [])
-            if response_answer:
+            if response_answer := response_dict.get("Answer", []):
                 resolution = response_answer[0].get("data", "")
                 # CloudFlare answers with 0.0.0.0 if the domain is known as malicious
                 if resolution == "0.0.0.0":

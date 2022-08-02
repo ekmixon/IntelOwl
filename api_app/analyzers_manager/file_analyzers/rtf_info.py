@@ -8,13 +8,11 @@ from api_app.analyzers_manager.classes import FileAnalyzer
 
 class RTFInfo(FileAnalyzer):
     def run(self):
-        results = {}
-        rtfobj_results = {}
         binary = self.read_file_bytes()
 
         rtfp = RtfObjParser(binary)
         rtfp.parse()
-        rtfobj_results["ole_objects"] = []
+        rtfobj_results = {"ole_objects": []}
         for rtfobj in rtfp.objects:
             if rtfobj.is_ole:
                 class_name = rtfobj.class_name.decode()
@@ -42,6 +40,4 @@ class RTFInfo(FileAnalyzer):
                 elif class_name.lower() == "equation.3":
                     rtfobj_results["exploit_equation_editor"] = True
 
-        results["rtfobj"] = rtfobj_results
-
-        return results
+        return {"rtfobj": rtfobj_results}

@@ -34,9 +34,7 @@ class GreyNoise(classes.ObservableAnalyzer):
         elif self.api_version == "v3":
             url = f"{self.base_url}/v3/community/{self.observable_name}"
             headers = {"Accept": "application/json"}
-            # optional usage of API key
-            api_key = self._secrets["api_key_name"]
-            if api_key:
+            if api_key := self._secrets["api_key_name"]:
                 headers["key"] = api_key
             response = requests.get(url, headers=headers)
             if response.status_code != 404:

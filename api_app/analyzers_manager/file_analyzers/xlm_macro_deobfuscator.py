@@ -52,6 +52,4 @@ class XlmMacroDeobfuscator(FileAnalyzer):
                 results["was_unencrypted"] = True
             return results
         except Exception as e:
-            if "Failed to decrypt" in str(e):
-                return {}
-            return {"errors": str(e)}
+            return {} if "Failed to decrypt" in str(e) else {"errors": str(e)}

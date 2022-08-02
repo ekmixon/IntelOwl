@@ -28,7 +28,7 @@ class ThugFile(FileAnalyzer, DockerBasedAnalyzer):
         # append final arguments,
         # -n -> output directory
         # -l -> the local file to analyze
-        self.args.extend(["-n", "/home/thug/" + tmp_dir, "-l", f"@{fname}"])
+        self.args.extend(["-n", f"/home/thug/{tmp_dir}", "-l", f"@{fname}"])
         # make request parameters
         req_data = {
             "args": self.args,

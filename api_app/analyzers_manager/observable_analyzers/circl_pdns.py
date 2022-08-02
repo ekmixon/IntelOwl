@@ -38,8 +38,8 @@ class CIRCL_PDNS(classes.ObservableAnalyzer):
                 f"Credentials are not valid: UnauthorizedError: {e}"
             )
 
+        keys_to_decode = ["time_first", "time_last"]
         for result_item in result:
-            keys_to_decode = ["time_first", "time_last"]
             for key_to_decode in keys_to_decode:
                 time_extracted = result_item.get(key_to_decode, None)
                 if time_extracted and isinstance(time_extracted, datetime.datetime):

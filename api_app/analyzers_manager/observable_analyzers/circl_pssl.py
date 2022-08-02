@@ -35,13 +35,12 @@ class CIRCL_PSSL(classes.ObservableAnalyzer):
 
         parsed_result = {"ip": self.observable_name, "certificates": []}
         for cert in certificates:
-            subject = (
+            if subject := (
                 result.get(self.observable_name)
                 .get("subjects", {})
                 .get(cert, {})
                 .get("values", [])
-            )
-            if subject:
+            ):
                 parsed_result["certificates"].append(
                     {"fingerprint": cert, "subject": subject[0]}
                 )

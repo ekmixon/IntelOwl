@@ -13,8 +13,7 @@ class VirusheeCheckHash(ObservableAnalyzer):
 
     def set_params(self, params):
         self.__session = requests.Session()
-        api_key = self._secrets["api_key_name"]
-        if api_key:
+        if api_key := self._secrets["api_key_name"]:
             self.__session.headers["X-API-Key"] = api_key
 
     def run(self):
@@ -25,8 +24,7 @@ class VirusheeCheckHash(ObservableAnalyzer):
             response.raise_for_status()
         except requests.RequestException as e:
             raise AnalyzerRunException(e)
-        result = response.json()
-        return result
+        return response.json()
 
     @classmethod
     def _monkeypatch(cls):

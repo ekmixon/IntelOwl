@@ -37,9 +37,7 @@ class Shodan(classes.ObservableAnalyzer):
             raise AnalyzerRunException(e)
 
         result = response.json()
-        if self.analysis_type == "honeyscore":
-            return {"honeyscore": result}
-        return result
+        return {"honeyscore": result} if self.analysis_type == "honeyscore" else result
 
     @classmethod
     def _monkeypatch(cls):

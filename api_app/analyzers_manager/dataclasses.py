@@ -44,13 +44,14 @@ class AnalyzerConfig(AbstractConfig):
         return observable_classification in self.observable_supported
 
     def is_filetype_supported(self, file_mimetype: str) -> bool:
-        if not self.supported_filetypes and not self.not_supported_filetypes:
+        if self.supported_filetypes or self.not_supported_filetypes:
+            return (
+                file_mimetype in self.supported_filetypes
+                and file_mimetype not in self.not_supported_filetypes
+            )
+        else:
             # base case: empty lists means supports all
             return True
-        return (
-            file_mimetype in self.supported_filetypes
-            and file_mimetype not in self.not_supported_filetypes
-        )
 
     def get_full_import_path(self) -> str:
         if self.is_type_observable or (self.is_type_file and self.run_hash):
@@ -72,9 +73,7 @@ class AnalyzerConfig(AbstractConfig):
         """
         all_configs = AnalyzerConfigSerializer.read_and_verify_config()
         config_dict = all_configs.get(analyzer_name, None)
-        if config_dict is None:
-            return None  # not found
-        return cls.from_dict(config_dict)
+        return None if config_dict is None else cls.from_dict(config_dict)
 
     @classmethod
     def all(cls) -> typing.Dict[str, "AnalyzerConfig"]:

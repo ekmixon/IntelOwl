@@ -26,7 +26,7 @@ class ZoomEye(classes.ObservableAnalyzer):
             self.query += f" hostname:{self.observable_name}"
             self.search_type = "host"
 
-        if self.search_type == "host" or self.search_type == "web":
+        if self.search_type in ["host", "web"]:
             self.url = self.base_url + self.search_type + "/search?query="
             self.url += self.query
 
@@ -37,7 +37,7 @@ class ZoomEye(classes.ObservableAnalyzer):
                 self.url += f"&facet={','.join(self.facets)}"
 
         elif self.search_type == "both":
-            self.url = self.base_url + "both/search?"
+            self.url = f"{self.base_url}both/search?"
             if self.history:
                 self.url += f"history={self.history}&"
             self.url += f"ip={self.observable_name}"
@@ -65,7 +65,7 @@ class ZoomEye(classes.ObservableAnalyzer):
             result["custom_options"]["facet"] = self.facets
         if self.history and self.search_type == "both":
             result["custom_options"]["history"] = self.history
-        result.update(response.json())
+        result |= response.json()
 
         return result
 

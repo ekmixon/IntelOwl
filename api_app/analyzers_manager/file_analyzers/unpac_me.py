@@ -27,7 +27,7 @@ class UnpacMe(FileAnalyzer):
         self.poll_distance = 5
 
     def run(self):
-        self.headers = {"Authorization": "Key %s" % self.__api_key}
+        self.headers = {"Authorization": f"Key {self.__api_key}"}
         unpac_id = self._upload()
         logger.info(f"md5 {self.md5} job {self.job_id} uploaded id {unpac_id}")
         for chance in range(self.max_tries):
@@ -95,8 +95,7 @@ class UnpacMe(FileAnalyzer):
     def _get_report(self, unpac_me_id) -> Dict:
         response = self._req_with_checks(f"{self.private}/results/{unpac_me_id}")
         result = response.json()
-        analysis_id = result.get("id", "")
-        if analysis_id:
+        if analysis_id := result.get("id", ""):
             result["permalink"] = f"https://www.unpac.me/results/{analysis_id}"
         return result
 

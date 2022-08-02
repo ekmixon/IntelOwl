@@ -23,8 +23,7 @@ class FileScanUpload(FileAnalyzer):
 
     def run(self):
         task_id = self.__upload_file_for_scan()
-        report = self.__fetch_report(task_id)
-        return report
+        return self.__fetch_report(task_id)
 
     def __upload_file_for_scan(self) -> int:
         binary = self.read_file_bytes()
@@ -32,8 +31,10 @@ class FileScanUpload(FileAnalyzer):
             raise AnalyzerRunException("File is empty")
         try:
             response = requests.post(
-                self.base_url + "/scan/file", files={"file": (self.filename, binary)}
+                f"{self.base_url}/scan/file",
+                files={"file": (self.filename, binary)},
             )
+
             response.raise_for_status()
         except requests.RequestException as e:
             raise AnalyzerRunException(e)

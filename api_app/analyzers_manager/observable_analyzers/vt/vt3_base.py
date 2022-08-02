@@ -50,7 +50,7 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
                 )
                 # this case is not a real error,...
                 # .. it happens when a requested object is not found and that's normal
-                if not response.status_code == 404:
+                if response.status_code != 404:
                     response.raise_for_status()
             except requests.RequestException as e:
                 raise AnalyzerRunException(e)
@@ -76,8 +76,9 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
                 # ...sent and VT is already analyzing it.
                 # In this case, just perform a little poll for the result
                 attributes = result.get("data", {}).get("attributes", {})
-                last_analysis_results = attributes.get("last_analysis_results", {})
-                if last_analysis_results:
+                if last_analysis_results := attributes.get(
+                    "last_analysis_results", {}
+                ):
                     # at this time, if the flag if set,
                     # we are going to force the analysis again for old samples
                     if (
@@ -145,8 +146,8 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
         # This can be overwritten to allow different configurations
         # Do not change this if you do not know what you are doing.
         # This impacts paid quota usage
-        max_tries = max_tries if max_tries else self.max_tries
-        poll_distance = poll_distance if poll_distance else self.poll_distance
+        max_tries = max_tries or self.max_tries
+        poll_distance = poll_distance or self.poll_distance
         try:
             binary = self._job.file.read()
         except Exception:
@@ -215,7 +216,7 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
             uri = self.base_url + endpoint
             response = requests.get(uri, headers=self.headers)
 
-            if not response.status_code == 404:
+            if response.status_code != 404:
                 response.raise_for_status()
 
         except requests.RequestException as e:
@@ -229,7 +230,7 @@ class VirusTotalv3AnalyzerMixin(BaseAnalyzerMixin):
             uri = self.base_url + endpoint
             response = requests.get(uri, headers=self.headers)
 
-            if not response.status_code == 404:
+            if response.status_code != 404:
                 response.raise_for_status()
 
         except requests.RequestException as e:

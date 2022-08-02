@@ -53,9 +53,7 @@ class DNStwist(classes.ObservableAnalyzer):
         if self._mxcheck:
             args.append("--mxcheck")
         if self._tld:
-            args.append("--tld")
-            args.append(self.dictionary_base_path + self._tld_dict)
-
+            args.extend(("--tld", self.dictionary_base_path + self._tld_dict))
         args.append(domain)
 
         process = subprocess.Popen(

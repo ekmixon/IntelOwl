@@ -79,37 +79,13 @@ class DocInfo(FileAnalyzer):
                     vba_code_all_modules += vba_code + "\n"
                 self.olevba_results["macro_data"] = macro_data
 
-                # example output
-                #
-                # {'description': 'Runs when the Word document is opened',
-                #  'keyword': 'AutoOpen',
-                #  'type': 'AutoExec'},
-                # {'description': 'May run an executable file or a system command',
-                #  'keyword': 'Shell',
-                #  'type': 'Suspicious'},
-                # {'description': 'May run an executable file or a system command',
-                #  'keyword': 'WScript.Shell',
-                #  'type': 'Suspicious'},
-                # {'description': 'May run an executable file or a system command',
-                #  'keyword': 'Run',
-                #  'type': 'Suspicious'},
-                # {'description': 'May run PowerShell commands',
-                #  'keyword': 'powershell',
-                #  'type': 'Suspicious'},
-                # {'description': '9BA55BE5', 'keyword': 'xxx', 'type': 'Hex String'},
-
-                # mraptor
-                macro_raptor = mraptor.MacroRaptor(vba_code_all_modules)
-                if macro_raptor:
+                if macro_raptor := mraptor.MacroRaptor(vba_code_all_modules):
                     macro_raptor.scan()
                     results["mraptor"] = (
                         "suspicious" if macro_raptor.suspicious else "ok"
                     )
 
-                # analyze macros
-                analyzer_results = self.vbaparser.analyze_macros()
-                # it gives None if it does not find anything
-                if analyzer_results:
+                if analyzer_results := self.vbaparser.analyze_macros():
                     analyze_macro_results = []
                     for kw_type, keyword, description in analyzer_results:
                         if kw_type != "Hex String":
@@ -148,9 +124,7 @@ class DocInfo(FileAnalyzer):
             if is_encrypted:
                 # by default oletools contains some basic passwords
                 # we just add some more guesses
-                common_pwd_to_check = []
-                for num in range(10):
-                    common_pwd_to_check.append(f"{num}{num}{num}{num}")
+                common_pwd_to_check = [f"{num}{num}{num}{num}" for num in range(10)]
                 # https://twitter.com/JohnLaTwC/status/1265377724522131457
                 filename_without_spaces_and_numbers = sub("[-_\d\s]", "", self.filename)
                 filename_without_extension = sub(
@@ -200,11 +174,8 @@ class DocInfo(FileAnalyzer):
 
                 for i in show_cells(excel_doc):
                     rec_str = ""
-                    if len(i) == 5:
-                        # rec_str = 'CELL:{:10}, {:20}, {}'
-                        # .format(i[0].get_local_address(), i[2], i[4])
-                        if i[2] != "None":
-                            rec_str = "{:20}".format(i[2])
+                    if len(i) == 5 and i[2] != "None":
+                        rec_str = "{:20}".format(i[2])
                     if rec_str:
                         parsed_file += rec_str.encode()
                         parsed_file += b"\n"

@@ -34,9 +34,7 @@ class DehashedSearch(ObservableAnalyzer):
                 "No secret retrieved for `api_key_name`."
             )
 
-        # try to identify search operator
-        operator = self.__identify_search_operator()
-        if operator:
+        if operator := self.__identify_search_operator():
             value = f"{operator}:{self.observable_name}"
         else:
             # if operator couldn't be identified, we can query without it

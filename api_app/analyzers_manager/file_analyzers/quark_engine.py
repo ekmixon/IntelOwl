@@ -15,8 +15,7 @@ class QuarkEngine(FileAnalyzer):
         report = Report()
         # start analysis
         report.analysis(self.filepath, "/opt/deploy/quark-rules")
-        # return json report
-        json_report = report.get_report("json")
-        if not json_report:
+        if json_report := report.get_report("json"):
+            return json_report
+        else:
             raise AnalyzerRunException("json report can not be empty")
-        return json_report

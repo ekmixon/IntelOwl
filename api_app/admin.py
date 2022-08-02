@@ -40,8 +40,10 @@ class CustomAuthTokenAdmin(AuthTokenAdmin):
     readonly_fields = ("token", "expiry", "created", "expires_in")
 
     def get_fieldsets(self, request, obj=None):
-        if not obj:
-            return [
+        return (
+            super().get_fieldsets(request, obj)
+            if obj
+            else [
                 (
                     "Create token for PyIntelOwl",
                     {
@@ -53,7 +55,7 @@ class CustomAuthTokenAdmin(AuthTokenAdmin):
                     },
                 ),
             ]
-        return super().get_fieldsets(request, obj)
+        )
 
     def has_change_permission(self, *args, **kwargs):
         return False

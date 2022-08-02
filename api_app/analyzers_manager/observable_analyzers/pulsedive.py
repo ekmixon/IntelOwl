@@ -43,15 +43,11 @@ class Pulsedive(ObservableAnalyzer):
             params += self.default_param
         resp = requests.get(f"{self.base_url}/info.php?{params}")
 
-        # handle 404 case, submit for analysis
         if resp.status_code == 404:
             # 2. submit new scan and then poll for result
-            result = self.__submit_for_analysis()
-        else:
-            resp.raise_for_status()
-            result = resp.json()
-
-        return result
+            return self.__submit_for_analysis()
+        resp.raise_for_status()
+        return resp.json()
 
     def __submit_for_analysis(self) -> dict:
         result = {}

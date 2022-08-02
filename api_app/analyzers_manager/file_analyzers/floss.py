@@ -61,11 +61,10 @@ class Floss(FileAnalyzer, DockerBasedAnalyzer):
                 ]
                 req_data = {"args": args, "timeout": self.timeout}
                 result["strings"][key] = self._docker_run(req_data)
-            else:
-                if (
+            elif (
                     len(result.get("strings", {}).get(key, []))
                     > self.max_no_of_strings[key]
                 ):
-                    result["strings"][key] = list(result["strings"][key])
-                    result["exceeded_max_number_of_strings"][key] = True
+                result["strings"][key] = list(result["strings"][key])
+                result["exceeded_max_number_of_strings"][key] = True
         return result

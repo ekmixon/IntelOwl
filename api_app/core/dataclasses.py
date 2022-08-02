@@ -88,7 +88,6 @@ class AbstractConfig:
         """
         if secrets_filter is None:
             secrets_filter = []
-        secrets = {}
         if secrets_filter:
             _filtered_secrets = {
                 key_name: self.secrets[key_name]
@@ -97,10 +96,10 @@ class AbstractConfig:
             }
         else:
             _filtered_secrets = self.secrets
-        for key_name, secret in _filtered_secrets.items():
-            secrets[key_name] = secrets_store.get_secret(
-                secret.env_var_key, default=None
-            )
+        secrets = {
+            key_name: secrets_store.get_secret(secret.env_var_key, default=None)
+            for key_name, secret in _filtered_secrets.items()
+        }
 
         return secrets
 

@@ -53,7 +53,7 @@ class TriageSearch(classes.ObservableAnalyzer):
                 "query": f"{self.observable_classification}:{self.observable_name}"
             }
 
-        response = self.session.get(self.base_url + "search", params=params)
+        response = self.session.get(f"{self.base_url}search", params=params)
 
         return response.json()
 
@@ -66,7 +66,7 @@ class TriageSearch(classes.ObservableAnalyzer):
             logger.info(
                 f"triage {self.observable_name} polling for result try #{_try + 1}"
             )
-            response = self.session.post(self.base_url + "samples", json=data)
+            response = self.session.post(f"{self.base_url}samples", json=data)
             if response.status_code == 200:
                 break
             time.sleep(self.poll_distance)
@@ -78,9 +78,9 @@ class TriageSearch(classes.ObservableAnalyzer):
         if sample_id is None:
             raise AnalyzerRunException("error sending sample")
 
-        self.session.get(self.base_url + f"samples/{sample_id}/events")
+        self.session.get(f"{self.base_url}samples/{sample_id}/events")
 
-        if self.report_type == "overview" or self.report_type == "complete":
+        if self.report_type in ["overview", "complete"]:
             final_report["overview"] = self.get_overview_report(sample_id)
 
         if self.report_type == "complete":
@@ -96,18 +96,20 @@ class TriageSearch(classes.ObservableAnalyzer):
 
     def get_overview_report(self, sample_id):
         overview = self.session.get(
-            self.base_url + f"samples/{sample_id}/overview.json"
+            f"{self.base_url}samples/{sample_id}/overview.json"
         )
+
         return overview.json()
 
     def get_static_report(self, sample_id):
-        static = self.session.get(self.base_url + f"samples/{sample_id}/reports/static")
+        static = self.session.get(f"{self.base_url}samples/{sample_id}/reports/static")
         return static.json()
 
     def get_task_report(self, sample_id, task):
         task_report = self.session.get(
-            self.base_url + f"samples/{sample_id}/{task}/report_triage.json"
+            f"{self.base_url}samples/{sample_id}/{task}/report_triage.json"
         )
+
         return task_report.status_code, task_report.json()
 
     @classmethod

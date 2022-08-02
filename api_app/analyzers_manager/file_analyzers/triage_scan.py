@@ -35,10 +35,9 @@ class TriageScanFile(classes.FileAnalyzer):
         self.poll_distance = 3
 
     def run(self):
-        final_report = {}
         self.headers = {"Authorization": f"Bearer {self.__api_key}"}
 
-        name_to_send = self.filename if self.filename else self.md5
+        name_to_send = self.filename or self.md5
         binary = self.read_file_bytes()
         files = {
             "file": (name_to_send, binary),
@@ -49,8 +48,9 @@ class TriageScanFile(classes.FileAnalyzer):
         for _try in range(self.max_tries):
             logger.info(f"triage md5 {self.md5} polling for result try #{_try + 1}")
             response = requests.post(
-                self.base_url + "samples", headers=self.headers, files=files
+                f"{self.base_url}samples", headers=self.headers, files=files
             )
+
             if response.status_code == 200:
                 break
             time.sleep(self.poll_distance)
@@ -63,11 +63,11 @@ class TriageScanFile(classes.FileAnalyzer):
             raise AnalyzerRunException("error sending sample")
 
         requests.get(
-            self.base_url + f"samples/{sample_id}/events", headers=self.headers
+            f"{self.base_url}samples/{sample_id}/events", headers=self.headers
         )
 
-        final_report["overview"] = self.get_overview_report(sample_id)
 
+        final_report = {"overview": self.get_overview_report(sample_id)}
         if self.report_type == "complete":
             final_report["static_report"] = self.get_static_report(sample_id)
 
@@ -77,31 +77,33 @@ class TriageScanFile(classes.FileAnalyzer):
                 if status_code == 200:
                     final_report["task_report"][f"{task}"] = task_report_json
 
-        analysis_id = final_report["overview"].get("sample", {}).get("id", "")
-        if analysis_id:
+        if analysis_id := final_report["overview"].get("sample", {}).get("id", ""):
             final_report["permalink"] = f"{self.report_url}{analysis_id}"
 
         return final_report
 
     def get_overview_report(self, sample_id):
         overview = requests.get(
-            self.base_url + f"samples/{sample_id}/overview.json",
+            f"{self.base_url}samples/{sample_id}/overview.json",
             headers=self.headers,
         )
+
         return overview.json()
 
     def get_static_report(self, sample_id):
         static = requests.get(
-            self.base_url + f"samples/{sample_id}/reports/static",
+            f"{self.base_url}samples/{sample_id}/reports/static",
             headers=self.headers,
         )
+
         return static.json()
 
     def get_task_report(self, sample_id, task):
         task_report = requests.get(
-            self.base_url + f"samples/{sample_id}/{task}/report_triage.json",
+            f"{self.base_url}samples/{sample_id}/{task}/report_triage.json",
             headers=self.headers,
         )
+
         return task_report.status_code, task_report.json()
 
     @classmethod

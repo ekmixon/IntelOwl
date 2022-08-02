@@ -47,11 +47,9 @@ class YaraScan(FileAnalyzer):
                         self.ruleset.append((full_path, yara.load(full_path)))
                 except yara.SyntaxError as e:
                     logger.warning(f"Rule {full_path} " f"has a syntax error {e}")
-                    continue
-            else:
-                if self.recursive:
-                    logger.info(f"Loading directory {full_path}")
-                    self.load_directory(full_path)
+            elif self.recursive:
+                logger.info(f"Loading directory {full_path}")
+                self.load_directory(full_path)
 
     def _validated_matches(self, rules: yara.Rules) -> list:
         try:
@@ -71,18 +69,19 @@ class YaraScan(FileAnalyzer):
             # you should add a "index.yar" or "index.yas" file
             # and select only the rules you would like to run
             if os.path.isdir(rulepath):
-                if os.path.isfile(rulepath + "/index.yas"):
-                    self.ruleset.append((rulepath, yara.load(rulepath + "/index.yas")))
-                elif os.path.isfile(rulepath + "/index.yar"):
+                if os.path.isfile(f"{rulepath}/index.yas"):
+                    self.ruleset.append((rulepath, yara.load(f"{rulepath}/index.yas")))
+                elif os.path.isfile(f"{rulepath}/index.yar"):
                     self.ruleset.append(
                         (
                             rulepath,
                             yara.compile(
-                                rulepath + "/index.yar",
+                                f"{rulepath}/index.yar",
                                 externals={"filename": self.filename},
                             ),
                         )
                     )
+
                 else:
                     self.load_directory(rulepath)
 

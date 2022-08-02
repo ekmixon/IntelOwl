@@ -113,8 +113,7 @@ class AbstractConfigSerializer(rfs.Serializer):
             if not secret_val and s_dict["required"]:
                 missing_secrets.append(s_key)
 
-        num_missing_secrets = len(missing_secrets)
-        if num_missing_secrets:
+        if num_missing_secrets := len(missing_secrets):
             configured = False
             num_total_secrets = len(secrets.keys())
             error_message = "(%s) not set; (%d of %d satisfied)" % (

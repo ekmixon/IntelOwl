@@ -34,18 +34,15 @@ class SignatureInfo(FileAnalyzer):
                     f"osslsigncode return code is {p.returncode}. Error: {err}"
                 )
 
-            if output:
-                if "No signature found" in output:
-                    results["no_signature"] = True
-                if "Signature verification: ok" in output:
-                    results["verified"] = True
-                if "Corrupt PE file" in output:
-                    results["corrupted"] = True
-            else:
+            if not output:
                 raise AnalyzerRunException("osslsigncode gave no output?")
 
-        # we should stop the subprocesses...
-        # .. in case we reach the time limit for the celery task
+            if "No signature found" in output:
+                results["no_signature"] = True
+            if "Signature verification: ok" in output:
+                results["verified"] = True
+            if "Corrupt PE file" in output:
+                results["corrupted"] = True
         except SoftTimeLimitExceeded as exc:
             self._handle_exception(exc)
             if p:

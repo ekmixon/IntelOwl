@@ -27,8 +27,7 @@ class MB_GET(classes.ObservableAnalyzer):
         result = response.json()
         result_data = result.get("data", [])
         if result_data and isinstance(result_data, list):
-            sha256 = result_data[0].get("sha256_hash", "")
-            if sha256:
+            if sha256 := result_data[0].get("sha256_hash", ""):
                 result["permalink"] = f"{cls.sample_url}{sha256}"
 
         return result

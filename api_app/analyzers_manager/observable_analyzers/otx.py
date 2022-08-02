@@ -58,8 +58,7 @@ class OTX(classes.ObservableAnalyzer):
             if not self.verbose and result["pulses"]:
                 result["pulses"] = result["pulses"][:20]
             for pulse in result["pulses"]:
-                pulse_id = pulse.get("id", "")
-                if pulse_id:
+                if pulse_id := pulse.get("id", ""):
                     pulse["link"] = f"https://otx.alienvault.com/pulse/{pulse_id}"
             result["geo"] = details.get("geo", {})
             result["malware_samples"] = [
@@ -71,9 +70,12 @@ class OTX(classes.ObservableAnalyzer):
             result["reputation"] = details.get("reputation", {}).get("reputation", None)
             result["url_list"] = details.get("url_list", {}).get("url_list", [])
             result["analysis"] = details.get("analysis", {}).get("analysis", {})
-            if not self.verbose:
-                if result["analysis"] and "plugins" in result["analysis"]:
-                    result["analysis"]["plugins"] = "removed because too long"
+            if (
+                not self.verbose
+                and result["analysis"]
+                and "plugins" in result["analysis"]
+            ):
+                result["analysis"]["plugins"] = "removed because too long"
 
         return result
 

@@ -28,6 +28,4 @@ class CheckDMARC(classes.ObservableAnalyzer):
 
         dmarc_str = dmarc_info[0]
 
-        dmarc_json = json.loads(dmarc_str)
-
-        return dmarc_json
+        return json.loads(dmarc_str)

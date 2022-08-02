@@ -58,7 +58,7 @@ def my_sandbox(file, ql_os, ql_arch, shellcode=False, profile=None):
     except Exception as e:
         result["setup_error"] = str(e)
     else:
-        result.update(generate_report(ql))
+        result |= generate_report(ql)
     finally:
         print(json.dumps(result))
 

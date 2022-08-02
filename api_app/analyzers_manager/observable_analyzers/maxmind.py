@@ -42,7 +42,7 @@ class Maxmind(classes.ObservableAnalyzer):
                 maxmind_result = {"error": error_message}
             logger.info(f"maxmind result: {maxmind_result}")
             if maxmind_result:
-                maxmind_final_result.update(maxmind_result)
+                maxmind_final_result |= maxmind_result
             else:
                 logger.warning("maxmind result not available")
 

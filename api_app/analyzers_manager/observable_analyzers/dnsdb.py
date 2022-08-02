@@ -99,11 +99,10 @@ class DNSdb(classes.ObservableAnalyzer):
                 f"{self._rrtype} is not a valid rrtype: {_supported_rrtype}"
             )
 
-        if self._query_type:
-            if self._query_type not in _query_types:
-                raise AnalyzerRunException(
-                    f"{self._query_type} not in available query types"
-                )
+        if self._query_type and self._query_type not in _query_types:
+            raise AnalyzerRunException(
+                f"{self._query_type} not in available query types"
+            )
 
         if not isinstance(self._limit, int):
             raise AnalyzerRunException(
@@ -184,7 +183,7 @@ class DNSdb(classes.ObservableAnalyzer):
                 endpoint = "rrset/name"
             elif self._query_type == "rrname-wildcard-left":
                 endpoint = "rrset/name"
-                observable_to_check = "*." + observable_to_check
+                observable_to_check = f"*.{observable_to_check}"
             elif self._query_type == "rrname-wildcard-right":
                 endpoint = "rrset/name"
                 observable_to_check += ".*"
@@ -192,10 +191,10 @@ class DNSdb(classes.ObservableAnalyzer):
                 endpoint = "rdata/name"
             elif self._query_type == "rdata-wildcard-left":
                 endpoint = "rdata/name"
-                observable_to_check = "*." + observable_to_check
+                observable_to_check = f"*.{observable_to_check}"
             elif self._query_type == "rdata-wildcard-right":
                 endpoint = "rdata/name"
-                observable_to_check += observable_to_check + ".*"
+                observable_to_check += f"{observable_to_check}.*"
             else:
                 raise AnalyzerRunException(f"{self._query_type} not supported")
         else:
@@ -273,10 +272,8 @@ class DNSdb(classes.ObservableAnalyzer):
             json_extracted_results["query_successful"] = "not supported for v1"
             if not self.no_results_found:
                 for item in result_text.split("\n"):
-                    if item:
-                        # in case of no results or error
-                        if "Error" not in item:
-                            json_extracted_results["data"].append(json.loads(item))
+                    if item and "Error" not in item:
+                        json_extracted_results["data"].append(json.loads(item))
         else:
             raise AnalyzerRunException(
                 f"{self._api_version} not supported version, "

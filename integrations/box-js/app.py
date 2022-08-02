@@ -77,7 +77,7 @@ def intercept_result(context, future: Future) -> None:
     # get current result
     res = future.result()
     fname = context.get("read_result_from", "")
-    dir_loc = safe_join("/tmp/boxjs", fname + ".results")
+    dir_loc = safe_join("/tmp/boxjs", f"{fname}.results")
     if not fname:
         if res.get("returncode", -1) == 0:
             res["returncode"] = -1

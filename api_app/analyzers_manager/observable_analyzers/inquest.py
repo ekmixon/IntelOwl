@@ -24,21 +24,20 @@ class InQuest(ObservableAnalyzer):
     @property
     def hash_type(self):
         hash_lengths = {32: "md5", 40: "sha1", 64: "sha256", 128: "sha512"}
-        hash_type = hash_lengths.get(len(self.observable_name), None)
-        if not hash_type:
+        if hash_type := hash_lengths.get(len(self.observable_name)):
+            return hash_type
+        else:
             raise AnalyzerRunException(
                 f"Given Hash: '{hash}' is not supported."
                 "Supported hash types are: 'md5', 'sha1', 'sha256', 'sha512'."
             )
-        return hash_type
 
     def type_of_generic(self):
-        if re.match(r"^[\w\.\+\-]+\@[\w]+\.[a-z]{2,3}$", self.observable_name):
-            type_ = "email"
-        else:
-            # TODO: This should be validated more thoroughly
-            type_ = "filename"
-        return type_
+        return (
+            "email"
+            if re.match(r"^[\w\.\+\-]+\@[\w]+\.[a-z]{2,3}$", self.observable_name)
+            else "filename"
+        )
 
     def run(self):
         result = {}

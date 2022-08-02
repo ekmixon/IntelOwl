@@ -78,7 +78,7 @@ class _AbstractAnalyzersScriptTestCase(TransactionTestCase):
             self.runtime_configuration,
         )
 
-        for i in range(0, int(self.TIMEOUT_SECONDS / self.SLEEP_SECONDS)):
+        for i in range(int(self.TIMEOUT_SECONDS / self.SLEEP_SECONDS)):
             time.sleep(self.SLEEP_SECONDS)
             # reload test_job object
             self.test_job.refresh_from_db()

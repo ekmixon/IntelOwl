@@ -22,9 +22,7 @@ class PEframe(FileAnalyzer, DockerBasedAnalyzer):
 
         result = self._docker_run(req_data, req_files)
 
-        if result:
-            # limit strings dump to first 100
-            if "strings" in result and "dump" in result["strings"]:
-                result["strings"]["dump"] = result["strings"]["dump"][:100]
+        if result and "strings" in result and "dump" in result["strings"]:
+            result["strings"]["dump"] = result["strings"]["dump"][:100]
 
         return result

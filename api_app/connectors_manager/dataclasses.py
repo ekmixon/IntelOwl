@@ -33,9 +33,7 @@ class ConnectorConfig(AbstractConfig):
         """
         all_configs = cls.serializer_class.read_and_verify_config()
         config_dict = all_configs.get(connector_name, None)
-        if config_dict is None:
-            return None  # not found
-        return cls.from_dict(config_dict)
+        return None if config_dict is None else cls.from_dict(config_dict)
 
     @classmethod
     def all(cls) -> typing.Dict[str, "ConnectorConfig"]:

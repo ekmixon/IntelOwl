@@ -20,8 +20,7 @@ class Auth0(classes.ObservableAnalyzer):
         response = requests.get(url, headers=headers)
         response.raise_for_status()
 
-        json_response = response.json()
-        return json_response
+        return response.json()
 
     @classmethod
     def _monkeypatch(cls):

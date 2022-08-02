@@ -43,10 +43,11 @@ class FireHol_IPList(classes.ObservableAnalyzer):
             db_list = db.split("\n")
 
             for ip_or_subnet in db_list:
-                if ip_or_subnet != "":
-                    if ipaddress.ip_address(ip) in ipaddress.ip_network(ip_or_subnet):
-                        result[list_name] = True
-                        break
+                if ip_or_subnet != "" and ipaddress.ip_address(
+                    ip
+                ) in ipaddress.ip_network(ip_or_subnet):
+                    result[list_name] = True
+                    break
 
         return result
 
@@ -58,8 +59,6 @@ class FireHol_IPList(classes.ObservableAnalyzer):
 
         try:
             iplist_location = f"{db_path}/{list_name}"
-            data_cleaned = ""
-
             logger.info(f"starting download of {list_name} from firehol iplist")
             url = f"https://iplists.firehol.org/files/{list_name}"
             r = requests.get(url)
@@ -67,9 +66,11 @@ class FireHol_IPList(classes.ObservableAnalyzer):
 
             data_extracted = r.content.decode()
 
-            for line in data_extracted.splitlines():
-                if not line.startswith("#"):
-                    data_cleaned += f"{line}\n"
+            data_cleaned = "".join(
+                f"{line}\n"
+                for line in data_extracted.splitlines()
+                if not line.startswith("#")
+            )
 
             with open(iplist_location, "w") as f:
                 f.write(data_cleaned)

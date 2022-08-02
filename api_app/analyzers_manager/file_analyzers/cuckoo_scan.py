@@ -19,14 +19,13 @@ class CuckooAnalysis(FileAnalyzer):
         # cuckoo installation can be with or without the api_token
         # it depends on version and configuration
         self.session = requests.Session()
-        api_key = self._secrets["api_key_name"]
-        if not api_key:
+        if api_key := self._secrets["api_key_name"]:
+            self.session.headers["Authorization"] = f"Bearer {api_key}"
+
+        else:
             logger.info(
                 f"{self.__repr__()}, (md5: {self.md5}) -> Continuing w/o API key.."
             )
-        else:
-            self.session.headers["Authorization"] = f"Bearer {api_key}"
-
         self.cuckoo_url = self._secrets["url_key_name"]
         self.task_id = 0
         self.result = {}
@@ -44,15 +43,13 @@ class CuckooAnalysis(FileAnalyzer):
 
         self.__cuckoo_request_scan(binary)
         self.__cuckoo_poll_result()
-        result = self.__cuckoo_retrieve_and_create_report()
-
-        return result
+        return self.__cuckoo_retrieve_and_create_report()
 
     def __cuckoo_request_scan(self, binary):
         logger.info(f"requesting scan for file: ({self.filename},{self.md5})")
 
         # send the file for analysis
-        name_to_send = self.filename if self.filename else self.md5
+        name_to_send = self.filename or self.md5
         files = {"file": (name_to_send, binary)}
         post_success = False
         response = None
@@ -61,13 +58,14 @@ class CuckooAnalysis(FileAnalyzer):
                 f"request #{chance} for file analysis of ({self.filename},{self.md5})"
             )
             response = self.session.post(
-                self.cuckoo_url + "tasks/create/file", files=files
+                f"{self.cuckoo_url}tasks/create/file", files=files
             )
+
             if response.status_code != 200:
                 logger.info(
-                    "failed post to start cuckoo analysis, status code {}"
-                    "".format(response.status_code)
+                    f"failed post to start cuckoo analysis, status code {response.status_code}"
                 )
+
                 time.sleep(5)
                 continue
             post_success = True
@@ -97,7 +95,7 @@ class CuckooAnalysis(FileAnalyzer):
             logger.info(
                 f"polling request #{chance + 1} for file ({self.filename},{self.md5})"
             )
-            url = self.cuckoo_url + "tasks/view/" + str(self.task_id)
+            url = f"{self.cuckoo_url}tasks/view/{str(self.task_id)}"
             response = self.session.get(url)
             json_response = response.json()
             status = json_response.get("task", {}).get("status", None)
@@ -124,8 +122,9 @@ class CuckooAnalysis(FileAnalyzer):
         )
         # download the report
         response = self.session.get(
-            self.cuckoo_url + "tasks/report/" + str(self.task_id) + "/json"
+            f"{self.cuckoo_url}tasks/report/{str(self.task_id)}/json"
         )
+
         json_response = response.json()
 
         # extract most IOCs as possible from signatures data reports
@@ -167,9 +166,8 @@ class CuckooAnalysis(FileAnalyzer):
             if "suspicious_process" in sig_name:
                 for suspicious_process_mark in sig_marks:
                     suspicious_process_ioc = suspicious_process_mark.get("ioc", "")
-                    match_url = re.search(regex_url, suspicious_process_ioc)
-                    if match_url:
-                        list_potentially_malicious_urls.append(match_url.group(1))
+                    if match_url := re.search(regex_url, suspicious_process_ioc):
+                        list_potentially_malicious_urls.append(match_url[1])
 
         # extract dyndns domains from specific signature, could be IOCs
         dyndns_domains = []
@@ -182,9 +180,8 @@ class CuckooAnalysis(FileAnalyzer):
             ioc = mark.get("ioc", "")
             if ioc and ioc.startswith("http"):
                 list_potentially_malicious_urls.append(ioc)
-            if mark.get("config", {}):
-                if mark["config"].get("url", []):
-                    list_potentially_malicious_urls.extend(mark["config"]["url"])
+            if mark.get("config", {}) and mark["config"].get("url", []):
+                list_potentially_malicious_urls.extend(mark["config"]["url"])
 
         # remove duplicates
         list_potentially_malicious_urls = list(set(list_potentially_malicious_urls))
@@ -200,18 +197,16 @@ class CuckooAnalysis(FileAnalyzer):
             for network in network_data.get("domains", [])
         ]
 
-        # extract all dns domain requested,...
-        # .. can be used as IOC even if the conn was not successful
-        dns_answered_list = []
         dns_data = network_data.get("dns", {})
-        for dns_dict in dns_data:
-            # if there are A records and we received an answer
+        dns_answered_list = [
+            dns_dict["request"]
+            for dns_dict in dns_data
             if (
                 dns_dict.get("type", "") == "A"
                 and dns_dict.get("answers", [])
                 and dns_dict.get("request", "")
-            ):
-                dns_answered_list.append(dns_dict["request"])
+            )
+        ]
 
         # other info
         info_data = json_response.get("info", {})

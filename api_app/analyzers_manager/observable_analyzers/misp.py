@@ -42,8 +42,7 @@ class MISP(classes.ObservableAnalyzer):
             params["type_attribute"] = ["md5", "sha1", "sha256"]
         result_search = misp_instance.search(**params)
         if isinstance(result_search, dict):
-            errors = result_search.get("errors", [])
-            if errors:
+            if errors := result_search.get("errors", []):
                 raise AnalyzerRunException(errors)
 
         return {"result_search": result_search, "instance_url": self.__url_name}

@@ -36,16 +36,16 @@ class VirusTotalv2ScanFile(classes.FileAnalyzer):
         # .. start a poll for the result
         # or in case we'd like to force the scan anyway from the configuration
         if not notify_url or self.wait_for_scan_anyway:
-            scan_id = resp.get("scan_id", None)
-            if not scan_id:
+            if scan_id := resp.get("scan_id", None):
+                result = self.__vt_poll_for_result(scan_id)
+
+            else:
                 raise (
                     AnalyzerRunException(
                         "no scan_id given by VirusTotal to retrieve the results."
                     )
                 )
-            result = self.__vt_poll_for_result(scan_id)
-
-        return result if result else resp
+        return result or resp
 
     def __vt_request_scan(self, notify_url):
         binary = self.read_file_bytes()
@@ -55,9 +55,7 @@ class VirusTotalv2ScanFile(classes.FileAnalyzer):
         files = {"file": binary}
 
         try:
-            resp = requests.post(
-                self.base_url + "file/scan", files=files, params=params
-            )
+            resp = requests.post(f"{self.base_url}file/scan", files=files, params=params)
             resp.raise_for_status()
         except requests.RequestException as e:
             raise AnalyzerRunException(e)
