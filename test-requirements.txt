@@ -3,3 +3,4 @@ black==21.11b1
 isort==5.10.1
 pre-commit==2.16.0
 coverage==6.2
+setuptools>=65.5.1 # not directly required, pinned by Snyk to avoid a vulnerability
