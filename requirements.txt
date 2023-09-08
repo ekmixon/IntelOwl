@@ -18,7 +18,7 @@ ppdeep>=20200505
 drf-spectacular==0.21.0
 easygui==0.98.2
 flower==1.0.0
-GitPython==3.1.18
+GitPython==3.1.35
 google>=3.0.0
 google-cloud-webrisk==1.6.0
 intezer-sdk==1.6
